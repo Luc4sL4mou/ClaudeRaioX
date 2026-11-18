@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 256 256">
+  <g stroke="#5b3a24" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <!-- pernas -->
+    <rect x="72" y="196" width="15" height="40" rx="3" fill="#ec8a3c"/>
+    <rect x="94" y="196" width="15" height="40" rx="3" fill="#ec8a3c"/>
+    <rect x="147" y="196" width="15" height="40" rx="3" fill="#ec8a3c"/>
+    <rect x="169" y="196" width="15" height="40" rx="3" fill="#ec8a3c"/>
+    <!-- corpo / cabeça -->
+    <rect x="52" y="22" width="152" height="130" rx="10" fill="#ec8a3c"/>
+    <!-- placa de raio-x -->
+    <rect x="38" y="104" width="180" height="104" rx="14" fill="#8e6cc4"/>
+    <rect x="52" y="116" width="152" height="80" rx="7" fill="#33403f" stroke-width="4"/>
+  </g>
+  <!-- olhos e bochechas -->
+  <rect x="88" y="48" width="16" height="30" rx="3" fill="#262626"/>
+  <rect x="152" y="48" width="16" height="30" rx="3" fill="#262626"/>
+  <rect x="91" y="52" width="5" height="8" rx="2" fill="#ffffff" opacity="0.8"/>
+  <rect x="155" y="52" width="5" height="8" rx="2" fill="#ffffff" opacity="0.8"/>
+  <ellipse cx="74" cy="88" rx="11" ry="7" fill="#f59aa0"/>
+  <ellipse cx="182" cy="88" rx="11" ry="7" fill="#f59aa0"/>
+  <!-- esqueleto -->
+  <g fill="#f4f1ea" stroke="#f4f1ea" stroke-linecap="round" stroke-linejoin="round">
+    <!-- coluna -->
+    <rect x="123" y="122" width="10" height="7" rx="2"/>
+    <rect x="123" y="132" width="10" height="7" rx="2"/>
+    <rect x="123" y="142" width="10" height="7" rx="2"/>
+    <rect x="123" y="152" width="10" height="7" rx="2"/>
+    <rect x="123" y="162" width="10" height="7" rx="2"/>
+    <!-- costelas -->
+    <g fill="none" stroke-width="5">
+      <path d="M120 128 Q100 128 98 140"/>
+      <path d="M120 138 Q102 138 101 150"/>
+      <path d="M120 148 Q106 148 105 158"/>
+      <path d="M136 128 Q156 128 158 140"/>
+      <path d="M136 138 Q154 138 155 150"/>
+      <path d="M136 148 Q150 148 151 158"/>
+    </g>
+    <!-- ossos dos braços -->
+    <g stroke-width="6">
+      <line x1="68" y1="130" x2="88" y2="150"/>
+      <line x1="188" y1="130" x2="168" y2="150"/>
+    </g>
+    <circle cx="65" cy="131" r="4.5"/><circle cx="69" cy="127" r="4.5"/>
+    <circle cx="87" cy="153" r="4.5"/><circle cx="91" cy="149" r="4.5"/>
+    <circle cx="191" cy="131" r="4.5"/><circle cx="187" cy="127" r="4.5"/>
+    <circle cx="169" cy="153" r="4.5"/><circle cx="165" cy="149" r="4.5"/>
+    <!-- bacia -->
+    <path d="M128 172 C112 168 100 174 102 184 C104 192 116 192 122 186 L128 190 L134 186 C140 192 152 192 154 184 C156 174 144 168 128 172 Z"/>
+  </g>
+  <ellipse cx="114" cy="182" rx="6" ry="4" fill="#33403f"/>
+  <ellipse cx="142" cy="182" rx="6" ry="4" fill="#33403f"/>
+  <!-- mãos segurando a placa -->
+  <g stroke="#5b3a24" stroke-width="6" stroke-linejoin="round" fill="#ec8a3c">
+    <rect x="22" y="138" width="30" height="34" rx="6"/>
+    <rect x="204" y="138" width="30" height="34" rx="6"/>
+  </g>
+</svg>
