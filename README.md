@@ -17,6 +17,10 @@
   <img src="docs/media/tema-matrix.gif" alt="Tema Matrix: chuva de caracteres verdes no topo da janela">
 </p>
 
+<p align="center">
+  ▶ <a href="docs/media/demo.mp4"><b>Vídeo de demonstração</b></a> (1 min, com dados fictícios) · música: "Cyberpunk Futuristic Music" de Poradovskyi (Pixabay)
+</p>
+
 ## O que ele mostra
 
 | Aba | O que tem |
@@ -31,7 +35,7 @@
 | **Memória** | `CLAUDE.md` global e de projetos, e as pastas de auto-memória |
 | **Projetos** | Custo e tokens da última sessão, linhas alteradas e tamanho do histórico |
 | **Configurações** | Cada `settings.json` e as permissões |
-| **Segurança** | Alertas: hooks/MCP que baixam e executam código, comandos ofuscados, segredos em texto puro, permissões amplas, skills com scripts, plugins de terceiros |
+| **Segurança** | Alertas: hooks/MCP que baixam e executam código, comandos ofuscados, segredos em texto puro (inclusive dentro de URLs e comandos), permissões amplas, skills com scripts, plugins de terceiros |
 | **Espaço** | Tamanho de cada pasta do `~/.claude` e se dá para apagar com segurança |
 
 E ainda:
@@ -46,6 +50,7 @@ E ainda:
 - **Só leitura.** O app lê `~/.claude` e `~/.claude.json` e nunca altera nada lá.
 - **Não acessa a internet.** Nada é enviado a lugar nenhum; os links das recomendações só abrem no seu navegador quando você clica.
 - **Não lê o seu token de login.** Por isso o uso do plano é a última cópia que o próprio Claude Code salvou, e o app avisa quando ela está antiga.
+- **Segredos mascarados.** Senhas e tokens em variáveis de ambiente, headers, URLs, argumentos e comandos de hooks aparecem como `•••` na tela e no relatório. O relatório exportado ainda tem o nome da conta e os caminhos dos seus projetos: revise antes de compartilhar.
 - O custo é uma **estimativa pelo preço da API**, útil para comparar com o plano; quem usa assinatura não paga esse valor.
 
 ## Requisitos

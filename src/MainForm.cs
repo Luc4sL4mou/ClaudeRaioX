@@ -47,10 +47,15 @@ public class MainForm : Form
 
         tabs.DrawItem += (_, e) =>
         {
-            // a faixa atrás das abas é pintada pelo sistema em cinza claro; cobre com a cor do tema
+            // a faixa atrás das abas é pintada pelo sistema em cinza claro; cobre com a cor do tema,
+            // sem pintar por cima das abas (a selecionada é desenhada por último e apagaria as outras)
             if (e.Index == 0)
                 using (var strip = new SolidBrush(T.Bg))
-                    e.Graphics.FillRectangle(strip, 0, 0, tabs.Width, tabs.GetTabRect(0).Bottom + 3);
+                using (var area = new Region(new Rectangle(0, 0, tabs.Width, tabs.GetTabRect(0).Bottom + 3)))
+                {
+                    for (var i = 0; i < tabs.TabCount; i++) area.Exclude(tabs.GetTabRect(i));
+                    e.Graphics.FillRegion(strip, area);
+                }
             var sel = e.Index == tabs.SelectedIndex;
             using var b = new SolidBrush(sel ? T.Hot : T.Panel);
             e.Graphics.FillRectangle(b, e.Bounds);
@@ -189,11 +194,17 @@ public class MainForm : Form
 
     static Item? Selected(ListView l) => l.SelectedItems.Count > 0 ? l.SelectedItems[0].Tag as Item : null;
 
-    static TextBox MakeText() => new()
+    static TextBox MakeText()
     {
-        Dock = DockStyle.Fill, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Both,
-        Font = Mono, WordWrap = true, BorderStyle = BorderStyle.None,
-    };
+        var t = new TextBox
+        {
+            Dock = DockStyle.Fill, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Both,
+            Font = Mono, WordWrap = true, BorderStyle = BorderStyle.None,
+        };
+        // o Windows seleciona todo o texto quando a caixa recebe foco; desfaz depois que ele termina
+        t.Enter += (_, _) => t.BeginInvoke(() => t.Select(0, 0));
+        return t;
+    }
 
     static void DrawHeader(object? sender, DrawListViewColumnHeaderEventArgs e)
     {
@@ -252,7 +263,8 @@ public class MainForm : Form
         status.Text = "Lendo… (o histórico de sessões pode levar alguns segundos)";
         try
         {
-            var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            // RAIOX_HOME: lê outra pasta (usado para gravar a demonstração com dados fictícios)
+            var home = Environment.GetEnvironmentVariable("RAIOX_HOME") is { Length: > 0 } h ? h : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             var sw = Stopwatch.StartNew();
             snap = await Task.Run(() => Scanner.Scan(home));
             overview.Text = snap.Overview.Replace("\r", "").Replace("\n", "\r\n");
@@ -313,6 +325,7 @@ public class MainForm : Form
     {
         using var dlg = new SaveFileDialog
         {
+            Title = "Exportar relatório · contém nome da conta, projetos e caminhos: revise antes de compartilhar",
             Filter = "Página HTML|*.html", FileName = $"ClaudeRaioX-{DateTime.Now:yyyy-MM-dd}.html",
             InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
         };

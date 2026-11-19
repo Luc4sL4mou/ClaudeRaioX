@@ -40,7 +40,9 @@ static class SelfTest
                 + "\"content\":[{\"type\":\"tool_use\",\"name\":\"mcp__claude_ai_Claude_Docs__batch\"}],\"usage\":{\"input_tokens\":1000000,\"output_tokens\":0}}}";
             Put(c, "projects/proj/s1.jsonl", line + "\n" + line + "\n");
             Put(c, "skills/minha/run.py", "print(1)");
-            Put(home, ".claude.json", "{\"mcpServers\":{\"x\":{\"command\":\"cmd\",\"env\":{\"TOKEN\":\"segredo123\"}}},"
+            Put(c, "settings.local.json", "{\"env\":{\"API_KEY\":\"chave789\"},\"hooks\":{\"Stop\":[{\"hooks\":[{\"type\":\"command\",\"command\":\"curl -H \\\"Authorization: Bearer abcdef123456\\\" https://x\"}]}]}}");
+            Put(home, ".claude.json", "{\"mcpServers\":{\"x\":{\"command\":\"cmd\",\"env\":{\"TOKEN\":\"segredo123\"}},"
+                + "\"db\":{\"command\":\"npx\",\"args\":[\"pg\",\"postgresql://u:senha456@host/db\",\"--api-key\",\"chave999\"]},\"w\":{\"url\":\"https://h/mcp?token=tok321\"}},"
                 + "\"skillUsage\":{\"minha\":{\"usageCount\":3,\"lastUsedAt\":1700000000000}}}");
 
             var s = Scanner.Scan(home);
@@ -52,7 +54,11 @@ static class SelfTest
             Check(s.Tabs["Hooks"].Any(h => h.Info == "start" && h.Origin == "plugin code-review"), "hook declarado no plugin.json");
             Check(s.Tabs["Plugins"].Single().Origin == "ativo", "plugin ativo");
             Check(s.Tabs["Memória"].Single().Info == "Preferências", "CLAUDE.md global");
-            var mcp = s.Tabs["MCP"].Single();
+            var all = string.Join("\n", s.Tabs.Values.SelectMany(l => l).Select(i => $"{i.Info} {i.Detail}")) + Report.Html(s, Theme.Cyberpunk);
+            foreach (var secret in new[] { "senha456", "chave999", "tok321", "abcdef123456", "chave789" })
+                Check(!all.Contains(secret), $"segredo em texto mascarado ({secret})");
+            Check(s.Tabs["Segurança"].Any(a => a.Name == "servidor MCP db") && s.Tabs["Segurança"].Any(a => a.Name == "hook Stop" && a.Origin == "usuário"), "alerta de segredo em comando/URL");
+            var mcp = s.Tabs["MCP"].Single(m => m.Name == "x");
             Check(!mcp.Detail.Contains("segredo123"), "env do MCP mascarado");
             Check(mcp.Extra == "comando ok", "comando do MCP achado no PATH");
             Check(Math.Abs(s.Daily[^1].Cost - 4.0) < 0.001, "custo do dia deduplicado (esperado US$ 4)");

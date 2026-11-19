@@ -98,9 +98,12 @@ public static class Scanner
                 var url = Str(cfg?["url"]);
                 var type = Or(Str(cfg?["type"]), url != "" ? "http" : "stdio");
                 var args = string.Join(' ', (cfg?["args"] as JsonArray ?? new JsonArray()).Select(Str));
-                var info = cmd != "" ? $"{type}: {cmd} {args}" : $"{type}: {url}";
+                var raw = cmd != "" ? $"{type}: {cmd} {args}" : $"{type}: {url}";
+                var info = Redact(raw);
                 var health = cmd == "" ? "" : OnPath(cmd) ? "comando ok" : "comando não encontrado";
                 Add("MCP", new(name, origin, info, health, path, Mask(cfg)));
+                if (info != raw)
+                    Add("Segurança", new($"servidor MCP {name}", origin, "senha ou token escrito no comando/URL; prefira ${VARIAVEL} de ambiente", "Média", path, Mask(cfg)));
                 foreach (var k in new[] { "env", "headers" })
                     foreach (var (envName, val) in cfg?[k] as JsonObject ?? new JsonObject())
                         if (SecretKey.IsMatch(envName) && Str(val) is { Length: > 0 } v && !v.Contains("${"))
@@ -155,7 +158,7 @@ public static class Scanner
             var allow = (perm?["allow"] as JsonArray)?.Count ?? 0;
             var deny = (perm?["deny"] as JsonArray)?.Count ?? 0;
             var keys = string.Join(", ", (n as JsonObject)?.Select(k => k.Key) ?? []);
-            Add("Configurações", new(Path.GetFileName(file), origin, keys, $"permissões: {allow} allow / {deny} deny", file, Read(file)));
+            Add("Configurações", new(Path.GetFileName(file), origin, keys, $"permissões: {allow} allow / {deny} deny", file, Redact(Read(file))));
         }
         void AddHooks(JsonNode? root, string origin, string path)
         {
@@ -164,7 +167,11 @@ public static class Scanner
                 var groups = arr as JsonArray ?? new JsonArray();
                 var cmds = groups.SelectMany(g => (g?["hooks"] as JsonArray ?? new JsonArray()).Select(h => Or(Str(h?["command"]), Str(h?["type"]))));
                 var matchers = groups.Select(g => Str(g?["matcher"])).Where(m => m != "");
-                Add("Hooks", new(evt, origin, string.Join(" | ", cmds), string.Join(", ", matchers), path, arr?.ToJsonString(Pretty) ?? ""));
+                var raw = string.Join(" | ", cmds);
+                var detail = Redact(arr?.ToJsonString(Pretty) ?? "");
+                Add("Hooks", new(evt, origin, Redact(raw), string.Join(", ", matchers), path, detail));
+                if (Redact(raw) != raw)
+                    Add("Segurança", new($"hook {evt}", origin, "senha ou token escrito no comando do hook; prefira variável de ambiente", "Média", path, detail));
             }
         }
 
@@ -197,7 +204,7 @@ public static class Scanner
             var mb = sessions.Sum(f => new FileInfo(f).Length) / 1048576.0;
             Add("Projetos", new(p, Directory.Exists(p) ? "" : "pasta não existe",
                 $"última sessão: US$ {cost:F2} · entrada {Num(node?["lastTotalInputTokens"]):N0} · saída {Num(node?["lastTotalOutputTokens"]):N0} · +{Num(node?["lastLinesAdded"])}/-{Num(node?["lastLinesRemoved"])} linhas",
-                $"{sessions.Count} sessões ({mb:F1} MB)", Directory.Exists(slugDir) ? slugDir : p, node?.ToJsonString(Pretty) ?? ""));
+                $"{sessions.Count} sessões ({mb:F1} MB)", Directory.Exists(slugDir) ? slugDir : p, Redact(node?.ToJsonString(Pretty) ?? "")));
         }
 
         foreach (var (_, list) in s.Tabs.Where(t => !Presorted.Contains(t.Key)))
@@ -293,7 +300,7 @@ public static class Scanner
         return d;
     }
 
-    // Esconde valores de env/headers (podem ter tokens)
+    // Esconde valores de env/headers (podem ter tokens) e segredos escritos em args/url
     static string Mask(JsonNode? cfg)
     {
         if (cfg == null) return "";
@@ -301,7 +308,24 @@ public static class Scanner
         foreach (var k in new[] { "env", "headers" })
             if (copy[k] is JsonObject o)
                 foreach (var name in o.Select(x => x.Key).ToList()) o[name] = "••• (oculto)";
-        return copy.ToJsonString(Pretty);
+        return Redact(copy.ToJsonString(Pretty));
+    }
+
+    // Segredos dentro de texto: usuário:senha@ em URLs, ?token=..., --api-key xyz, Bearer xyz, "password": "..."
+    static readonly (Regex rx, string rep)[] SecretText =
+    {
+        (new(@"(://[^/\s:@""']+:)[^@\s/""']+@"), "$1•••@"),
+        (new(@"([?&][\w-]*(token|key|secret|pass|auth|sig)[\w-]*=)[^&\s""']+", RegexOptions.IgnoreCase), "$1•••"),
+        (new(@"(--?[\w-]*(token|apikey|api-key|api_key|secret|password|passwd)[\w-]*(=|\s+))[^\s""'-][^\s""']*", RegexOptions.IgnoreCase), "$1•••"),
+        (new(@"(""--?[\w-]*(token|apikey|api-key|api_key|secret|password|passwd)[\w-]*""\s*,\s*"")[^""]+", RegexOptions.IgnoreCase), "$1•••"),
+        (new(@"((Bearer|Basic|token)\s+)[A-Za-z0-9._~+/=-]{8,}", RegexOptions.IgnoreCase), "$1•••"),
+        (new(@"(""[^""]*(token|secret|password|passwd|api[_-]?key)[^""]*""\s*:\s*"")(?!\$\{|•)[^""]+", RegexOptions.IgnoreCase), "$1•••"),
+    };
+
+    public static string Redact(string text)
+    {
+        foreach (var (rx, rep) in SecretText) text = rx.Replace(text, rep);
+        return text;
     }
 
     static bool OnPath(string cmd)
