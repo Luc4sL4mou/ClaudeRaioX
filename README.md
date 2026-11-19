@@ -17,10 +17,6 @@
   <img src="docs/media/tema-matrix.gif" alt="Tema Matrix: chuva de caracteres verdes no topo da janela">
 </p>
 
-<p align="center">
-  ▶ <a href="docs/media/demo.mp4"><b>Vídeo de demonstração</b></a> (1 min, com dados fictícios) · música: "Cyberpunk Futuristic Music" de Poradovskyi (Pixabay)
-</p>
-
 ## O que ele mostra
 
 | Aba | O que tem |
