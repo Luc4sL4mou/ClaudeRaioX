@@ -53,6 +53,13 @@ E ainda:
 - **Segredos mascarados.** Senhas e tokens em variáveis de ambiente, headers, URLs, argumentos e comandos de hooks aparecem como `•••` na tela e no relatório. O relatório exportado ainda tem o nome da conta e os caminhos dos seus projetos: revise antes de compartilhar.
 - O custo é uma **estimativa pelo preço da API**, útil para comparar com o plano; quem usa assinatura não paga esse valor.
 
+## Baixar
+
+1. Instale o [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) (x64), se ainda não tiver.
+2. Baixe o **`ClaudeRaioX.exe`** da [última release](https://github.com/Luc4sL4mou/ClaudeRaioX/releases/latest) e abra. Não precisa instalar.
+
+O arquivo "Source code (zip)" da release é o código-fonte, não o programa. Como o exe não tem assinatura digital, o Windows pode mostrar "O Windows protegeu o computador": clique em **Mais informações** > **Executar assim mesmo**.
+
 ## Requisitos
 
 - Windows 10 ou 11
